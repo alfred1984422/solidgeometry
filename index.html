@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>立體幾何：證明邏輯鏈特訓（修復版）</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立體幾何：證明邏輯鏈特訓（5層階梯）</title>
     <style>
         :root {
             --level-1-color: #10b981; /* 具象層 - 綠色 */
@@ -14,26 +14,21 @@
             --bg: #f8fafc;
             --panel: #ffffff;
             --text: #334155;
-            --selected-bg: #fff7ed;
-            --selected-border: #f97316;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg);
             margin: 0;
             display: flex;
             height: 100vh;
-            height: 100dvh;
             color: var(--text);
             overflow: hidden;
         }
 
         /* 左側：互動幾何區 */
         #visual-area {
-            flex: 1.2;
+            flex: 1.5;
             background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
             display: flex;
             flex-direction: column;
@@ -41,15 +36,13 @@
             align-items: center;
             position: relative;
             border-right: 1px solid #cbd5e1;
-            transition: all 0.3s ease;
         }
 
         svg {
-            width: 95%;
-            height: 90%;
+            width: 90%;
+            height: 80%;
             max-width: 800px;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
-            touch-action: none;
         }
 
         .vertex { fill: #1e293b; cursor: pointer; transition: r 0.2s; }
@@ -65,62 +58,38 @@
         /* 右側：邏輯控制區 */
         #control-panel {
             flex: 1;
-            padding: 20px;
+            padding: 30px;
             background: var(--panel);
             display: flex;
             flex-direction: column;
             box-shadow: -5px 0 15px rgba(0,0,0,0.05);
             overflow-y: auto;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* 手機端適配佈局 */
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            #visual-area {
-                flex: none;
-                height: 38vh;
-                border-right: none;
-                border-bottom: 1px solid #e2e8f0;
-            }
-            #control-panel {
-                flex: 1;
-                height: 62vh;
-                padding: 15px;
-                box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
-            }
-            h1 { font-size: 18px; margin-bottom: 5px; }
-            .sub-title { font-size: 12px; margin-bottom: 10px; }
-            .instruction-box { font-size: 13px; padding: 10px; margin-bottom: 10px; }
-            .vertex { r: 6; }
-            .vertex-label { font-size: 14px; }
         }
 
         /* 進度指示器 */
         .stage-indicator {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             position: relative;
-            padding: 0 5px;
+            padding: 0 10px;
         }
         .stage-indicator::before {
-            content: ''; position: absolute; top: 12px; left: 10px; right: 10px; height: 2px; background: #e2e8f0; z-index: 0;
+            content: ''; position: absolute; top: 15px; left: 10px; right: 10px; height: 3px; background: #e2e8f0; z-index: 0;
         }
         .stage-dot {
-            width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e1;
+            width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 3px solid #cbd5e1;
             z-index: 1; display: flex; justify-content: center; align-items: center; font-weight: bold; color: #94a3b8;
             transition: all 0.3s;
-            font-size: 12px;
+            font-size: 14px;
         }
-        .stage-dot.active { transform: scale(1.2); color: white; border-color: transparent; }
+        .stage-dot.active { transform: scale(1.1); color: white; border-color: transparent; }
         
         /* 標題與指引 */
-        h1 { font-size: 20px; margin: 0 0 8px 0; color: #1e293b; }
-        .sub-title { font-size: 13px; color: #64748b; margin-bottom: 15px; line-height: 1.4; }
+        h1 { font-size: 22px; margin: 0 0 10px 0; }
+        .sub-title { font-size: 14px; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
         .instruction-box {
-            background: #f0f9ff; border-left: 4px solid var(--level-2-color); padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; color: #334155;
+            background: #f0f9ff; border-left: 4px solid var(--level-2-color); padding: 15px; border-radius: 4px; margin-bottom: 20px;
         }
 
         /* 互動元素容器 */
@@ -128,46 +97,31 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            padding-bottom: 60px;
+            gap: 15px;
         }
 
-        /* 拖拽塊樣式 (優化為點擊移動) */
+        /* 拖拽塊樣式 */
         .draggable-container {
-            min-height: 120px;
+            min-height: 200px;
             background: #f8fafc;
             border: 2px dashed #cbd5e1;
             border-radius: 8px;
-            padding: 8px;
-            margin-bottom: 8px;
-            transition: background 0.2s;
+            padding: 10px;
+            margin-bottom: 10px;
         }
-        .draggable-container.highlight-target {
-            background: #ecfccb;
-            border-color: #84cc16;
-        }
-
         .logic-block {
-            padding: 12px;
+            padding: 10px 15px;
             background: white;
             border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 8px;
-            cursor: pointer;
+            cursor: grab;
             font-size: 14px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-            user-select: none;
-            display: flex;
-            align-items: center;
+            transition: transform 0.2s, border-color 0.2s;
         }
         .logic-block:hover { border-color: var(--level-2-color); }
-        .logic-block.selected { 
-            background-color: var(--selected-bg); 
-            border-color: var(--selected-border);
-            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
-            transform: scale(1.01);
-        }
+        .logic-block:active { cursor: grabbing; transform: scale(1.02); }
         
         /* 策略按鈕 */
         .strategy-btn {
@@ -178,56 +132,32 @@
             text-align: left;
             cursor: pointer;
             transition: all 0.2s;
-            margin-bottom: 8px;
         }
-        .strategy-btn:active { background: #f1f5f9; }
+        .strategy-btn:hover { border-color: var(--level-5-color); background: #fdf2f8; }
         .strategy-btn.selected { background: var(--level-5-color); color: white; border-color: var(--level-5-color); }
-        .strategy-btn.selected span { color: rgba(255,255,255,0.9); }
 
-        /* 底部固定按鈕區 */
-        .bottom-bar {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            padding: 15px;
-            background: rgba(255,255,255,0.95);
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            backdrop-filter: blur(5px);
-        }
-
+        /* 按鈕 */
         .action-btn {
-            width: 100%;
-            padding: 14px;
+            margin-top: auto;
+            padding: 15px;
             background: #334155;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        .action-btn:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+        .action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
         .action-btn.success { background: #10b981; }
 
         /* 反饋彈窗 */
         #feedback {
-            margin-bottom: 10px;
-            font-size: 13px;
+            margin-top: 10px;
+            font-size: 14px;
             font-weight: bold;
             text-align: center;
-            min-height: 18px;
-        }
-
-        .mobile-hint {
-            display: block;
-            text-align: center;
-            font-size: 12px;
-            color: #94a3b8;
-            margin-bottom: 5px;
+            min-height: 20px;
         }
 
     </style>
@@ -235,10 +165,10 @@
 <body>
 
     <div id="visual-area">
-        <svg id="geo-svg" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet">
+        <svg id="geo-svg" viewBox="0 0 500 400">
             </svg>
-        <div style="position: absolute; bottom: 10px; color: #64748b; font-size: 12px; background: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 10px;">
-            提示：可縮放查看圖形
+        <div style="position: absolute; bottom: 20px; color: #64748b; font-size: 12px;">
+            提示：嘗試拖拽右側的邏輯塊或點擊圖形
         </div>
     </div>
 
@@ -258,20 +188,18 @@
 
         <div id="interaction-zone"></div>
 
-        <div class="bottom-bar">
-            <div id="feedback"></div>
-            <button class="action-btn" id="next-btn" onclick="checkAndNext()">驗證答案</button>
-        </div>
+        <div id="feedback"></div>
+        <button class="action-btn" id="next-btn" onclick="checkAndNext()">驗證答案</button>
     </div>
 
     <script>
-        // === 題目數據庫 ===
+        // === 題目數據庫 (基於上傳文件擴充) ===
         const levels = [
             {
                 id: 1,
                 title: "1. 具象關聯：中點的直覺",
-                desc: "【基礎層】找出構成「線線平行」的關鍵元素。",
-                instruction: "請直接點擊圖形中 棱 SA 的中點 E 和 棱 SC 的中點 F。",
+                desc: "【基礎層】請通過點擊圖形，識別出構成「線線平行」的關鍵幾何元素。依據：三角形中位線定理。",
+                instruction: "點擊棱 SA 的中點 E 和棱 SC 的中點 F，構建輔助線。",
                 points: {
                     S: [250, 50], A: [100, 350], B: [250, 400], C: [400, 350],
                     E: [175, 200], F: [325, 200]
@@ -280,14 +208,14 @@
                     ['S','A'], ['S','B'], ['S','C'], ['A','B'], ['B','C'], ['A','C', true]
                 ],
                 targetPoints: ['E', 'F'],
-                correctMsg: "正確！中位線 EF // AC 是證明的起點。",
+                correctMsg: "正確！連接 EF 後，由中位線定理可知 EF // AC，這是證明線面平行的起點。",
                 color: "#10b981",
                 type: "click"
-            }, // 注意這裡的逗號
+            },
             {
                 id: 2,
                 title: "2. 步驟規範：中位線邏輯",
-                desc: "【基礎層】將證明步驟排序。點擊選中語句，再點擊目標區放入。",
+                desc: "【基礎層】將打亂的證明步驟拖拽到正確位置。依據：中位線法 。",
                 instruction: "題目：已知 M 是 PC 中點，O 是 AC 中點。求證：PA // 平面 BMD。",
                 points: {
                     P: [250, 50], A: [150, 300], B: [350, 300], C: [400, 200], D: [200, 200],
@@ -298,6 +226,7 @@
                     ['A','B'], ['B','C'], ['C','D', true], ['D','A', true],
                     ['A','C', true], ['B','D', true]
                 ],
+                // 邏輯塊
                 blocks: [
                     { id: 'b1', text: "連接 AC, BD 交於點 O" },
                     { id: 'b2', text: "因為 ABCD 是平行四邊形，O 為 AC 中點" },
@@ -307,42 +236,42 @@
                     { id: 'b6', text: "所以 PA // 平面 BMD" }
                 ],
                 correctOrder: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6'],
-                correctMsg: "邏輯滿分！這是標準的證明結構。",
+                correctMsg: "邏輯正確！這是最標準的證明題結構。",
                 color: "#3b82f6",
                 type: "sort"
-            }, // 注意這裡的逗號
+            },
             {
                 id: 3,
-                title: "3. 步驟規範：構造平行四邊形",
-                desc: "【進階層】點擊選中語句，按邏輯順序移入下方。",
-                instruction: "題目：E 為 CD 中點，F 為 PB 中點。求證：EF // 平面 PAD。",
+                title: "3. 步驟規範：平行四邊形構造",
+                desc: "【進階層】難度升級！需要構造輔助平行四邊形。依據：。",
+                instruction: "題目：P-ABCD 底面為平行四邊形，E 為 CD 中點，F 為 PB 中點。求證：EF // 平面 PAD。",
                 points: {
                     P: [250, 50], A: [100, 300], B: [350, 300], C: [400, 200], D: [150, 200],
-                    E: [275, 200], F: [300, 175], G: [175, 175]
+                    E: [275, 200], F: [300, 175], G: [175, 175] // G is midpoint of PA
                 },
                 lines: [
                     ['P','A'], ['P','B'], ['P','C'], ['P','D'],
                     ['A','B'], ['B','C'], ['C','D', true], ['D','A', true],
-                    ['E','F', true]
+                    ['E','F', true] // Target line
                 ],
                 blocks: [
                     { id: 's1', text: "取 PA 中點 G，連接 FG, DG" },
                     { id: 's2', text: "在 △PAB 中，F, G 為中點 ⇒ FG // AB 且 FG = ½AB" },
                     { id: 's3', text: "已知 E 為 CD 中點 ⇒ DE // AB 且 DE = ½AB" },
-                    { id: 's4', text: "∴ FG // DE 且 FG = DE ⇒ DEFG 為平行四邊形" },
+                    { id: 's4', text: "∴ FG // DE 且 FG = DE ⇒ 四邊形 DEFG 為平行四邊形" },
                     { id: 's5', text: "∴ EF // DG" },
                     { id: 's6', text: "又 DG ⊂ 平面 PAD，EF ⊄ 平面 PAD ⇒ EF // 平面 PAD" }
                 ],
                 correctOrder: ['s1', 's2', 's3', 's4', 's5', 's6'],
-                correctMsg: "漂亮！成功構造了平行四邊形。",
+                correctMsg: "漂亮！通過「掛靠」中點構造平行四邊形是經典考法。",
                 color: "#6366f1",
                 type: "sort"
-            }, // 注意這裡的逗號
+            },
             {
                 id: 4,
-                title: "4. 步驟規範：隱藏的中點",
-                desc: "【高階層】正方形對角線交點即中點。",
-                instruction: "題目：P 為外一點，M, N 分別為 PA, BD 中點。求證：MN // 平面 PBC。",
+                title: "4. 步驟規範：隱藏的交點",
+                desc: "【高階層】圖形中沒有直接的中點，需要利用正方形性質。依據：。",
+                instruction: "題目：正方形 ABCD 外一點 P，M 在 PA 上，N 在 BD 上，且均為中點。求證：MN // 平面 PBC。",
                 points: {
                     P: [200, 50], A: [100, 300], B: [300, 300], C: [350, 200], D: [150, 200],
                     M: [150, 175], N: [225, 250]
@@ -361,15 +290,15 @@
                     { id: 'c6', text: "∴ MN // 平面 PBC" }
                 ],
                 correctOrder: ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'],
-                correctMsg: "太棒了！發現了隱含的中點條件。",
+                correctMsg: "太棒了！你能發現「對角線交點即中點」這個隱含條件。",
                 color: "#8b5cf6",
                 type: "sort"
-            }, // 注意這裡的逗號
+            },
             {
                 id: 5,
                 title: "5. 邏輯遷移：策略選擇",
-                desc: "【挑戰層】面對複雜圖形，選擇正確策略。",
-                instruction: "題目：三棱柱中，E, F 分別是 AB, AC 中點。求證：平面 EFA' // 平面 BC...？",
+                desc: "【挑戰層】面對三棱柱複雜圖形，請選擇正確的證明策略。依據：面面平行轉化 。",
+                instruction: "題目：在三棱柱中，E, F 分別是 AB, AC 中點。如何證明平面 EFA' // 平面 BC...？",
                 points: {
                     A1: [150, 50], B1: [350, 50], C1: [100, 150],
                     A: [150, 250], B: [350, 250], C: [100, 350],
@@ -386,7 +315,7 @@
                     { id: 'strat2', title: "策略 B：構造線面垂直", detail: "嘗試證明 A'A 垂直於底面...", correct: false },
                     { id: 'strat3', title: "策略 C：利用體對角線", detail: "連接 A'B 和 BC'...", correct: false }
                 ],
-                correctMsg: "卓越的洞察力！掌握了面面平行的核心邏輯。",
+                correctMsg: "卓越的洞察力！你已經掌握了從線線平行推導面面平行的核心邏輯。",
                 color: "#ec4899",
                 type: "select"
             }
@@ -394,7 +323,7 @@
 
         let currentLevelIndex = 0;
         let clickedPoints = [];
-        let selectedBlock = null; 
+        let draggedItem = null;
         let selectedStrategy = null;
 
         // === 初始化 ===
@@ -402,49 +331,48 @@
             renderLevel(0);
         }
 
-        // === 渲染關卡 ===
+        // === 渲染關卡核心邏輯 ===
         function renderLevel(index) {
             currentLevelIndex = index;
             const level = levels[index];
-            selectedBlock = null;
             
-            // UI 更新
+            // 1. UI 更新
             document.getElementById('level-title').innerText = level.title;
             document.getElementById('level-title').style.color = level.color;
             document.getElementById('level-desc').innerText = level.desc;
             document.getElementById('instruction').innerText = level.instruction;
             document.getElementById('feedback').innerText = "";
-            const nextBtn = document.getElementById('next-btn');
-            nextBtn.disabled = true;
-            nextBtn.classList.remove('success');
-            nextBtn.innerText = "驗證答案";
-            nextBtn.style.background = "#334155"; 
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').classList.remove('success');
+            document.getElementById('next-btn').innerText = "驗證答案";
+            document.getElementById('next-btn').style.background = "#334155"; // Reset color
 
-            // 指示器
+            // 指示器更新
             document.querySelectorAll('.stage-dot').forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
                 dot.style.background = (i === index) ? level.color : (i < index ? level.color : '#fff');
                 dot.style.color = (i <= index) ? '#fff' : '#94a3b8';
-                dot.style.opacity = (i < index) ? 0.6 : 1;
+                if(i < index) dot.style.opacity = 0.6;
+                else dot.style.opacity = 1;
             });
 
-            // 繪圖
+            // 2. 繪圖
             drawGeometry(level);
 
-            // 渲染互動區
+            // 3. 渲染互動區
             const zone = document.getElementById('interaction-zone');
             zone.innerHTML = '';
 
             if (level.type === "click") {
                 clickedPoints = [];
             } else if (level.type === "sort") {
-                renderSortInteraction(zone, level);
+                renderDragDrop(zone, level);
             } else if (level.type === "select") {
                 renderStrategies(zone, level);
             }
         }
 
-        // === 繪圖 ===
+        // === 幾何繪製 ===
         function drawGeometry(level) {
             const svg = document.getElementById('geo-svg');
             svg.innerHTML = ''; 
@@ -466,33 +394,36 @@
                 
                 const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 circle.setAttribute("cx", val[0]); circle.setAttribute("cy", val[1]);
-                circle.setAttribute("r", isInteractive ? 10 : 4);
+                circle.setAttribute("r", isInteractive ? 6 : 3.5);
                 circle.setAttribute("class", "vertex");
                 
                 if (isInteractive) {
-                    circle.setAttribute("fill", "rgba(251, 191, 36, 0.8)");
+                    circle.setAttribute("fill", "#fbbf24");
                     circle.style.cursor = "pointer";
                     circle.onclick = () => handlePointClick(key, circle);
                 } else {
                     circle.setAttribute("fill", "#1e293b");
+                    circle.style.cursor = "default";
                 }
                 svg.appendChild(circle);
 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("x", val[0] + 12); text.setAttribute("y", val[1] + 4);
+                text.setAttribute("x", val[0] + 8); text.setAttribute("y", val[1] - 5);
                 text.setAttribute("class", "vertex-label");
                 text.textContent = key;
                 svg.appendChild(text);
             }
         }
 
-        // === 互動: 點擊點 ===
+        // === Level 1: 點擊互動 ===
         function handlePointClick(key, element) {
             if (clickedPoints.includes(key)) return;
             clickedPoints.push(key);
             element.setAttribute("fill", levels[0].color);
-            
+            element.setAttribute("r", 8);
+
             if (clickedPoints.length === 2) {
+                // 畫出連線
                 const svg = document.getElementById('geo-svg');
                 const p1 = levels[0].points[clickedPoints[0]];
                 const p2 = levels[0].points[clickedPoints[1]];
@@ -508,90 +439,60 @@
             }
         }
 
-        // === 互動: 排序 ===
-        function renderSortInteraction(container, level) {
-            const hint = document.createElement('span');
-            hint.className = "mobile-hint";
-            hint.innerText = "👆 點擊選中語句，再點擊下方空白處放入";
-            container.appendChild(hint);
-
+        // === Sort Type: 拖拽排序 ===
+        function renderDragDrop(container, level) {
             const sourceDiv = document.createElement('div');
             sourceDiv.className = 'draggable-container';
             sourceDiv.id = 'source-container';
-            
-            const targetDivLabel = document.createElement('div');
-            targetDivLabel.innerHTML = '<strong>證明邏輯鏈 (按順序放入)：</strong>';
-            targetDivLabel.style.fontSize = '14px';
-            targetDivLabel.style.marginBottom = '5px';
+
+            const targetDiv = document.createElement('div');
+            targetDiv.style.marginTop = '10px';
+            targetDiv.innerHTML = '<strong>證明邏輯鏈（請按順序拖入下方）：</strong>';
 
             const sortArea = document.createElement('div');
             sortArea.className = 'draggable-container';
             sortArea.style.borderColor = level.color;
             sortArea.style.background = '#eff6ff';
             sortArea.id = 'target-container';
-            sortArea.style.minHeight = '150px';
 
+            // 打亂積木
             const shuffled = [...level.blocks].sort(() => Math.random() - 0.5);
 
             shuffled.forEach(block => {
-                const el = createBlockElement(block);
+                const el = document.createElement('div');
+                el.className = 'logic-block';
+                el.draggable = true;
+                el.innerText = block.text;
+                el.id = block.id;
+                
+                el.ondragstart = (e) => { draggedItem = e.target; e.target.style.opacity = '0.5'; };
+                el.ondragend = (e) => { e.target.style.opacity = '1'; };
+                
                 sourceDiv.appendChild(el);
             });
 
-            const handleContainerClick = (containerEl) => {
-                containerEl.onclick = () => {
-                    if (selectedBlock && selectedBlock.parentElement !== containerEl) {
-                        containerEl.appendChild(selectedBlock);
-                        selectedBlock.classList.remove('selected');
-                        document.querySelectorAll('.draggable-container').forEach(c => c.classList.remove('highlight-target'));
-                        selectedBlock = null;
-                        
+            // 拖拽事件
+            [sourceDiv, sortArea].forEach(area => {
+                area.ondragover = (e) => e.preventDefault();
+                area.ondrop = (e) => {
+                    e.preventDefault();
+                    if (draggedItem) {
+                        area.appendChild(draggedItem);
+                        // 檢查完成度
                         const inTarget = sortArea.querySelectorAll('.logic-block').length;
                         if (inTarget === level.blocks.length) {
                             enableNextButton();
                         }
                     }
                 };
-            };
-
-            handleContainerClick(sourceDiv);
-            handleContainerClick(sortArea);
+            });
 
             container.appendChild(sourceDiv);
-            container.appendChild(targetDivLabel);
+            container.appendChild(targetDiv);
             container.appendChild(sortArea);
         }
 
-        function createBlockElement(block) {
-            const el = document.createElement('div');
-            el.className = 'logic-block';
-            el.innerText = block.text;
-            el.id = block.id;
-            
-            el.onclick = (e) => {
-                e.stopPropagation();
-                if (selectedBlock === el) {
-                    el.classList.remove('selected');
-                    selectedBlock = null;
-                    document.querySelectorAll('.draggable-container').forEach(c => c.classList.remove('highlight-target'));
-                    return;
-                }
-                if (selectedBlock) selectedBlock.classList.remove('selected');
-                selectedBlock = el;
-                el.classList.add('selected');
-
-                const currentContainer = el.parentElement;
-                const otherContainer = currentContainer.id === 'source-container' 
-                    ? document.getElementById('target-container') 
-                    : document.getElementById('source-container');
-                
-                document.querySelectorAll('.draggable-container').forEach(c => c.classList.remove('highlight-target'));
-                otherContainer.classList.add('highlight-target');
-            };
-            return el;
-        }
-
-        // === 互動: 選擇題 ===
+        // === Select Type: 策略選擇 ===
         function renderStrategies(container, level) {
             selectedStrategy = null;
             level.strategies.forEach(strat => {
@@ -620,22 +521,23 @@
             const level = levels[currentLevelIndex];
             let isCorrect = false;
 
+            // 驗證
             if (level.type === "click") {
-                isCorrect = true;
+                isCorrect = true; // 已經視覺驗證
             } else if (level.type === "sort") {
                 const targetArea = document.getElementById('target-container');
                 const userOrder = Array.from(targetArea.children).map(el => el.id);
                 if (JSON.stringify(userOrder) === JSON.stringify(level.correctOrder)) {
                     isCorrect = true;
                 } else {
-                    feedback.innerText = "順序有誤，請檢查邏輯：已知 -> 推導 -> 結論。";
+                    feedback.innerText = "邏輯順序有誤，請再思考一下：已知條件 -> 中間推導 -> 結論。";
                     feedback.style.color = "#ef4444";
                     return;
                 }
             } else if (level.type === "select") {
                 if (selectedStrategy && selectedStrategy.correct) isCorrect = true;
                 else {
-                    feedback.innerText = "這不是最優解，請再試試。";
+                    feedback.innerText = "該策略不是最優解，請再試試。";
                     feedback.style.color = "#ef4444";
                     return;
                 }
@@ -647,13 +549,16 @@
                 btn.classList.add('success');
                 btn.innerText = (currentLevelIndex < levels.length - 1) ? "正確！下一關" : "恭喜通關！";
                 
+                // 成功時的視覺獎勵：畫出輔助線
                 const svg = document.getElementById('geo-svg');
-                if (level.id === 2) { 
-                    svg.appendChild(createAuxLine(level.points['O'], level.points['M']));
-                } else if (level.id === 3) {
+                if (level.id === 2) { // Level 2
+                    const line = createAuxLine(level.points['O'], level.points['M']);
+                    svg.appendChild(line);
+                } else if (level.id === 3) { // Level 3
                     svg.appendChild(createAuxLine(level.points['G'], level.points['F']));
                     svg.appendChild(createAuxLine(level.points['D'], level.points['G']));
-                } else if (level.id === 4) {
+                } else if (level.id === 4) { // Level 4
+                    // 畫 AC 和 BD
                     svg.appendChild(createAuxLine(level.points['A'], level.points['C']));
                     svg.appendChild(createAuxLine(level.points['B'], level.points['D']));
                 }
@@ -662,7 +567,7 @@
                     if (currentLevelIndex < levels.length - 1) {
                         renderLevel(currentLevelIndex + 1);
                     } else {
-                        alert("太棒了！你已經完成了所有幾何邏輯特訓！");
+                        alert("恭喜！你已經完成了幾何證明邏輯的全套特訓！");
                         location.reload();
                     }
                 };
